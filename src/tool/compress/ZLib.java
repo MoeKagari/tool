@@ -1,4 +1,4 @@
-package tool;
+package tool.compress;
 
 import java.io.ByteArrayOutputStream;
 import java.util.zip.Deflater;

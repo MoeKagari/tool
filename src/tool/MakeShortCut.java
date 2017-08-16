@@ -2,19 +2,22 @@ package tool;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 
-/**
- * 创建快捷方式
- * @author MoeKagari
- */
+/** 创建快捷方式 */
 public class MakeShortCut {
-
-	public static void main(String[] args) {
-		MakeShortCut.creatShotcut("shortcutmaker.js", new File("MONOMONO.EXE"), "", "MONOMONO");
-	}
-
-	public static void creatShotcut(String temp, File source, String folder, String name) {
+	/**
+	 * 创建快捷方式
+	 * @param temp js文件的暂存位置
+	 * @param source 源文件路径
+	 * @param folder 快捷方式的目标文件夹
+	 * @param name 快捷方式的文件名
+	 * @return 是否创建成功
+	 * @throws IOException js文件创建失败
+	 * @throws InterruptedException js文件执行失败
+	 */
+	public static boolean creatShotcut(String temp, File source, String folder, String name) throws IOException, InterruptedException {
 		try (PrintStream out = new PrintStream(new FileOutputStream(new File(temp)))) {
 			out.println("WScript.Echo(\"Creating   shortcuts...\");");
 			out.println("Shell   =   new   ActiveXObject(\"WScript.Shell\");");
@@ -46,19 +49,12 @@ public class MakeShortCut {
 			out.println("link.WorkingDirectory   =   \"" + source.getAbsoluteFile().getParentFile().getAbsolutePath().replace("\\", "\\\\") + "\";");
 			out.println("link.Save();");
 			out.println("WScript.Echo(\"Shortcuts   created.\");");
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 
-		try {
-			Process process = Runtime.getRuntime().exec("cmd.exe   /c   cscript.exe   /nologo    " + temp);
-			process.waitFor();
-			System.out.println("创建快捷方式" + (process.exitValue() == 0 ? "成功" : "失败"));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
+		Process process = Runtime.getRuntime().exec("cmd.exe   /c   cscript.exe   /nologo    " + temp);
+		process.waitFor();
 		new File(temp).delete();
-	}
 
+		return process.exitValue() == 0;
+	}
 }

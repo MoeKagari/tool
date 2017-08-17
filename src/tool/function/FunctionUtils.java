@@ -1,4 +1,5 @@
-package tool;
+
+package tool.function;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,48 +18,17 @@ import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import java.util.stream.Stream.Builder;
+
+import tool.function.funcinte.IntObjConsumer;
+import tool.function.funcinte.IntObjFunction;
+import tool.function.funcinte.TeConsumer;
 
 /**
  * 结合java8的 function包,lambda表达式,stream 使用
  * @author MoeKagari
  */
 public class FunctionUtils {
-	/** 三个参数的Consumer */
-	@FunctionalInterface
-	public static interface TeConsumer<S, T, U> {
-		public void accept(S s, T t, U u);
-
-		public default TeConsumer<S, T, U> andThen(TeConsumer<? super S, ? super T, ? super U> after) {
-			return (s, t, u) -> {
-				this.accept(s, t, u);
-				after.accept(s, t, u);
-			};
-		}
-	}
-
-	/** 两个int → object */
-	@FunctionalInterface
-	public static interface BiIntFunction<S> {
-		public S apply(int a, int b);
-	}
-
-	/** int,object → object */
-	@FunctionalInterface
-	public static interface IntObjFunction<S, T> {
-		public T apply(int i, S s);
-	}
-
-	@FunctionalInterface
-	public static interface IntObjConsumer<S> {
-		public void accept(int index, S s);
-	}
-
 	public static <S> String emptyString(S s) {
-		return "";
-	}
-
-	public static String emptyString() {
 		return "";
 	}
 
@@ -92,11 +62,11 @@ public class FunctionUtils {
 	}
 
 	public static <S> boolean isTrue(Predicate<? super S> p, S s) {
-		return p.test(s) == true;
+		return isTrue(p.test(s));
 	}
 
 	public static <S, T> boolean isTrue(BiPredicate<? super S, ? super T> bp, S s, T t) {
-		return bp.test(s, t) == true;
+		return isTrue(bp.test(s, t));
 	}
 
 	public static boolean isFalse(boolean b) {
@@ -104,11 +74,11 @@ public class FunctionUtils {
 	}
 
 	public static <S> boolean isFalse(Predicate<? super S> p, S s) {
-		return p.test(s) == false;
+		return isFalse(p.test(s));
 	}
 
 	public static <S, T> boolean isFalse(BiPredicate<? super S, ? super T> bp, S s, T t) {
-		return bp.test(s, t) == false;
+		return isFalse(bp.test(s, t));
 	}
 
 	/*----------------------------------------------------------------------------------------------------------*/
@@ -168,7 +138,7 @@ public class FunctionUtils {
 	/*-----------------------------------------Runnable-----------------------------------------------------------------*/
 
 	public static <S> void ifRunnable(int value, IntPredicate pre, Runnable run) {
-		if (pre.test(value)) run.run();
+		ifRunnable(pre.test(value), run);
 	}
 
 	public static <S> void ifNotRunnable(int value, IntPredicate pre, Runnable run) {
@@ -176,7 +146,7 @@ public class FunctionUtils {
 	}
 
 	public static <S> void ifRunnable(S s, Predicate<? super S> pre, Runnable run) {
-		if (pre.test(s)) run.run();
+		ifRunnable(pre.test(s), run);
 	}
 
 	public static <S> void ifNotRunnable(S s, Predicate<? super S> pre, Runnable run) {
@@ -252,17 +222,15 @@ public class FunctionUtils {
 	/*-----------------------------------------forEach-----------------------------------------------------------------*/
 
 	public static <S, T> void forEach(S[] ss, T[] ts, BiConsumer<? super S, ? super T> consu) {
-		if (ss.length != ts.length) return;
-		int len = ss.length;
-		for (int i = 0; i < len; i++) {
+		if (ss.length != ts.length) throw new RuntimeException("两数组长度不合");
+		for (int i = 0; i < ss.length; i++) {
 			consu.accept(ss[i], ts[i]);
 		}
 	}
 
 	public static <S> void forEach(S[] ss, int[] is, ObjIntConsumer<? super S> consu) {
-		if (ss.length != is.length) return;
-		int len = ss.length;
-		for (int i = 0; i < len; i++) {
+		if (ss.length != is.length) throw new RuntimeException("两数组长度不合");
+		for (int i = 0; i < ss.length; i++) {
 			consu.accept(ss[i], is[i]);
 		}
 	}
@@ -275,8 +243,8 @@ public class FunctionUtils {
 		IntStream.range(0, ss.length).forEach(index -> consu.accept(index, ss[index]));
 	}
 
-	public static <S> void forEach(List<S> ss, ObjIntConsumer<? super S> consu) {
-		IntStream.range(0, ss.size()).forEach(index -> consu.accept(ss.get(index), index));
+	public static <S> void forEach(List<S> ss, IntObjConsumer<? super S> consu) {
+		IntStream.range(0, ss.size()).forEach(index -> consu.accept(index, ss.get(index)));
 	}
 
 	public static void forEachInt(int[] intArray, IntConsumer consu) {
@@ -286,11 +254,7 @@ public class FunctionUtils {
 	/*-----------------------------------------other-----------------------------------------------------------------*/
 
 	public static <S, T> List<T> toListUseIndex(List<S> ss, IntObjFunction<? super S, ? extends T> fun) {
-		Builder<T> builder = Stream.builder();
-		for (int index = 0; index < ss.size(); index++) {
-			builder.add(fun.apply(index, ss.get(index)));
-		}
-		return builder.build().collect(Collectors.toList());
+		return IntStream.range(0, ss.size()).mapToObj(index -> fun.apply(index, ss.get(index))).collect(Collectors.toList());
 	}
 
 	public static <S, T, U> void toMapForEach(Stream<S> stream, Function<? super S, ? extends T> key, Function<? super S, ? extends U> value, BiConsumer<? super T, ? super U> con) {

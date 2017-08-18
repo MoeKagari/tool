@@ -239,16 +239,16 @@ public class FunctionUtils {
 		Arrays.stream(ss).forEach(consu);
 	}
 
+	public static void forEachInt(int[] intArray, IntConsumer consu) {
+		IntStream.of(intArray).forEach(consu);
+	}
+
 	public static <S> void forEachUseIndex(S[] ss, IntObjConsumer<? super S> consu) {
 		IntStream.range(0, ss.length).forEach(index -> consu.accept(index, ss[index]));
 	}
 
-	public static <S> void forEach(List<S> ss, IntObjConsumer<? super S> consu) {
+	public static <S> void forEachUseIndex(List<S> ss, IntObjConsumer<? super S> consu) {
 		IntStream.range(0, ss.size()).forEach(index -> consu.accept(index, ss.get(index)));
-	}
-
-	public static void forEachInt(int[] intArray, IntConsumer consu) {
-		IntStream.of(intArray).forEach(consu);
 	}
 
 	/*-----------------------------------------other-----------------------------------------------------------------*/

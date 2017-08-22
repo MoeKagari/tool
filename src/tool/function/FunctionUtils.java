@@ -1,8 +1,10 @@
 
 package tool.function;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.RandomAccess;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
@@ -22,10 +24,13 @@ import java.util.stream.Stream;
 import tool.function.funcinte.IntObjConsumer;
 import tool.function.funcinte.IntObjFunction;
 import tool.function.funcinte.TeConsumer;
+import tool.iterator.IteratorUtils;
 
 /**
  * 结合java8的 function包,lambda表达式,stream 使用
  * @author MoeKagari
+ * @see Function
+ * @see Stream
  */
 public class FunctionUtils {
 	public static <S> String emptyString(S s) {
@@ -248,13 +253,22 @@ public class FunctionUtils {
 	}
 
 	public static <S> void forEachUseIndex(List<S> ss, IntObjConsumer<? super S> consu) {
-		IntStream.range(0, ss.size()).forEach(index -> consu.accept(index, ss.get(index)));
+		if (ss instanceof RandomAccess) {
+			IntStream.range(0, ss.size()).forEach(index -> consu.accept(index, ss.get(index)));
+		} else {
+			IteratorUtils.forEachUseIndex(ss.iterator(), consu);
+		}
 	}
 
 	/*-----------------------------------------other-----------------------------------------------------------------*/
 
+	/** 返回的list为{@link ArrayList} */
 	public static <S, T> List<T> toListUseIndex(List<S> ss, IntObjFunction<? super S, ? extends T> fun) {
-		return IntStream.range(0, ss.size()).mapToObj(index -> fun.apply(index, ss.get(index))).collect(Collectors.toList());
+		if (ss instanceof RandomAccess) {
+			return IntStream.range(0, ss.size()).mapToObj(index -> fun.apply(index, ss.get(index))).collect(Collectors.toCollection(ArrayList::new));
+		} else {
+			return IteratorUtils.toListUseIndex(ss.iterator(), fun);
+		}
 	}
 
 	public static <S, T, U> void toMapForEach(Stream<S> stream, Function<? super S, ? extends T> key, Function<? super S, ? extends U> value, BiConsumer<? super T, ? super U> con) {

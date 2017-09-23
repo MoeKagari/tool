@@ -28,6 +28,7 @@ import tool.iterator.IteratorUtils;
 
 /**
  * 结合java8的 function包,lambda表达式,stream 使用
+ * 
  * @author MoeKagari
  * @see Function
  * @see Stream
@@ -277,9 +278,5 @@ public class FunctionUtils {
 
 	public static <S, T, U> void toMapForEach(List<S> list, Function<? super S, ? extends T> key, Function<? super S, ? extends U> value, BiConsumer<? super T, ? super U> con) {
 		list.forEach(s -> con.accept(key.apply(s), value.apply(s)));
-	}
-
-	public static <S, T, U> void toMapForEach(S[] array, Function<? super S, ? extends T> key, Function<? super S, ? extends U> value, BiConsumer<? super T, ? super U> con) {
-		forEach(array, s -> con.accept(key.apply(s), value.apply(s)));
 	}
 }

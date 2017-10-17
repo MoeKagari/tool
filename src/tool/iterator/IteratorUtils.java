@@ -5,8 +5,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
-import tool.function.funcinte.IntObjConsumer;
-import tool.function.funcinte.IntObjFunction;
+import tool.function.IntObjConsumer;
+import tool.function.IntObjFunction;
 
 public class IteratorUtils {
 	public static <S> void forEach(Iterator<S> iter, Consumer<S> con) {

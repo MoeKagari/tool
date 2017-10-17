@@ -1,7 +1,6 @@
 package tool;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
@@ -13,21 +12,17 @@ public class Downloader {
 		return download(urlStr, -1);
 	}
 
-	public static byte[] download(String urlStr, int proxyPort) {
+	public static byte[] download(String urlStr, String proxyHost, int proxyPort) throws Exception {
 		Proxy proxy = null;
-		if (proxyPort != -1) {
-			proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", proxyPort));
+		if (proxyHost != null && proxyPort > 0) {
+			proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
 		}
 
 		HttpURLConnection huc;
-		try {
-			if (proxy == null) {
-				huc = (HttpURLConnection) new URL(urlStr).openConnection();
-			} else {
-				huc = (HttpURLConnection) new URL(urlStr).openConnection(proxy);
-			}
-		} catch (IOException e) {
-			return null;
+		if (proxy != null) {
+			huc = (HttpURLConnection) new URL(urlStr).openConnection(proxy);
+		} else {
+			huc = (HttpURLConnection) new URL(urlStr).openConnection();
 		}
 
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); InputStream is = huc.getInputStream()) {
@@ -37,10 +32,16 @@ public class Downloader {
 				baos.write(b, 0, len);
 			}
 			return baos.toByteArray();
-		} catch (IOException e) {
-			return null;
 		} finally {
 			huc.disconnect();
+		}
+	}
+
+	public static byte[] download(String urlStr, int proxyPort) {
+		try {
+			return download(urlStr, "127.0.0.1", proxyPort);
+		} catch (Exception e) {
+			return null;
 		}
 	}
 }

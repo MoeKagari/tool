@@ -12,18 +12,14 @@ import java.util.function.Function;
 import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 import java.util.function.IntPredicate;
-import java.util.function.IntSupplier;
+import java.util.function.IntUnaryOperator;
 import java.util.function.ObjIntConsumer;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import tool.function.funcinte.IntObjConsumer;
-import tool.function.funcinte.IntObjFunction;
-import tool.function.funcinte.TeConsumer;
 import tool.iterator.IteratorUtils;
 
 /**
@@ -36,14 +32,6 @@ import tool.iterator.IteratorUtils;
 public class FunctionUtils {
 	public static <S> String emptyString(S s) {
 		return "";
-	}
-
-	public static int[] arrayCopy(int[] is) {
-		return Arrays.copyOf(is, is.length);
-	}
-
-	public static <S> S[] arrayCopy(S[] ss) {
-		return Arrays.copyOf(ss, ss.length);
 	}
 
 	/** 数学上的除法,并不是编程中的除法"/" */
@@ -125,22 +113,6 @@ public class FunctionUtils {
 		ifRunnable(!b, run);
 	}
 
-	public static int ifSupplier(boolean b, IntSupplier sup, int defaultValue) {
-		return b ? sup.getAsInt() : defaultValue;
-	}
-
-	public static int ifNotSupplier(boolean b, IntSupplier sup, int defaultValue) {
-		return ifSupplier(!b, sup, defaultValue);
-	}
-
-	public static <S> S ifSupplier(boolean b, Supplier<? extends S> sup, S defaultValue) {
-		return b ? sup.get() : defaultValue;
-	}
-
-	public static <S> S ifNotSupplier(boolean b, Supplier<? extends S> sup, S defaultValue) {
-		return ifSupplier(!b, sup, defaultValue);
-	}
-
 	/*-----------------------------------------Runnable-----------------------------------------------------------------*/
 
 	public static <S> void ifRunnable(int value, IntPredicate pre, Runnable run) {
@@ -148,7 +120,7 @@ public class FunctionUtils {
 	}
 
 	public static <S> void ifNotRunnable(int value, IntPredicate pre, Runnable run) {
-		ifRunnable(value, pre.negate(), run);
+		ifNotRunnable(pre.test(value), run);
 	}
 
 	public static <S> void ifRunnable(S s, Predicate<? super S> pre, Runnable run) {
@@ -156,7 +128,7 @@ public class FunctionUtils {
 	}
 
 	public static <S> void ifNotRunnable(S s, Predicate<? super S> pre, Runnable run) {
-		ifRunnable(s, pre.negate(), run);
+		ifNotRunnable(pre.test(s), run);
 	}
 
 	/*--------------------------------------------Consumer--------------------------------------------------------------*/
@@ -178,6 +150,14 @@ public class FunctionUtils {
 	}
 
 	/*-------------------------------------------Function---------------------------------------------------------------*/
+
+	public static int ifFunction(int value, IntPredicate pre, IntUnaryOperator fun, int defaultValue) {
+		return pre.test(value) ? fun.applyAsInt(value) : defaultValue;
+	}
+
+	public static int ifNotFunction(int value, IntPredicate pre, IntUnaryOperator fun, int defaultValue) {
+		return ifFunction(value, pre.negate(), fun, defaultValue);
+	}
 
 	public static <S> S ifFunction(int value, IntPredicate pre, IntFunction<? extends S> fun, S defaultValue) {
 		return pre.test(value) ? fun.apply(value) : defaultValue;
@@ -262,6 +242,17 @@ public class FunctionUtils {
 	}
 
 	/*-----------------------------------------other-----------------------------------------------------------------*/
+
+	public static <S, T extends S> Stream<T> down(Stream<S> parentStream, Class<T> childClass) {
+		return parentStream.filter(ele -> childClass.isInstance(ele)).map(ele -> childClass.cast(ele));
+	}
+
+	/** 返回的list为{@link ArrayList} */
+	public static <S, T extends S> List<T> down(List<S> parentList, Class<T> childClass) {
+		List<T> result = new ArrayList<>();
+		down(parentList.stream(), childClass).forEach(result::add);
+		return result;
+	}
 
 	/** 返回的list为{@link ArrayList} */
 	public static <S, T> List<T> toListUseIndex(List<S> ss, IntObjFunction<? super S, ? extends T> fun) {

@@ -1,4 +1,4 @@
-package tool.function.funcinte;
+package tool.function;
 
 @FunctionalInterface
 public interface IntObjPredicate<S> {

@@ -12,12 +12,15 @@ import java.util.function.Function;
 import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 import java.util.function.IntPredicate;
+import java.util.function.IntSupplier;
 import java.util.function.IntUnaryOperator;
 import java.util.function.ObjIntConsumer;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import tool.iterator.IteratorUtils;
@@ -30,6 +33,10 @@ import tool.iterator.IteratorUtils;
  * @see Stream
  */
 public class FunctionUtils {
+	public static String emptyString() {
+		return "";
+	}
+
 	public static <S> String emptyString(S s) {
 		return "";
 	}
@@ -76,6 +83,40 @@ public class FunctionUtils {
 	}
 
 	/*----------------------------------------------------------------------------------------------------------*/
+
+	@SafeVarargs
+	public static <S> List<S> asList(S... ss) {
+		return Arrays.asList(ss);
+	}
+
+	public static <S> Stream<S> stream(S[] ss) {
+		return Arrays.stream(ss);
+	}
+
+	public static IntStream stream(int[] is) {
+		return Arrays.stream(is);
+	}
+
+	public static DoubleStream stream(double[] ds) {
+		return Arrays.stream(ds);
+	}
+
+	public static LongStream stream(long[] ls) {
+		return Arrays.stream(ls);
+	}
+
+	/*----------------------------------------------------------------------------------------------------------*/
+
+	public static IntSupplier addIntSupplier(IntSupplier is1, IntSupplier is2) {
+		return () -> is1.getAsInt() + is2.getAsInt();
+	}
+
+	@SafeVarargs
+	public static <S> void use(S s, Consumer<S>... cons) {
+		for (Consumer<S> con : cons) {
+			con.accept(s);
+		}
+	}
 
 	public static <S, T, U> Function<S, U> andThen(Function<S, T> fun1, Function<? super T, ? extends U> fun2) {
 		return fun1.andThen(fun2);

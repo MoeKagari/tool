@@ -3,7 +3,9 @@ package tool.function;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.RandomAccess;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
@@ -16,6 +18,7 @@ import java.util.function.IntSupplier;
 import java.util.function.IntUnaryOperator;
 import java.util.function.ObjIntConsumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
@@ -29,6 +32,8 @@ import tool.iterator.IteratorUtils;
  * 结合java8的 function包,lambda表达式,stream 使用
  * 
  * @author MoeKagari
+ * @see Supplier
+ * @see Consumer
  * @see Function
  * @see Stream
  */
@@ -46,11 +51,11 @@ public class FunctionUtils {
 		return a * 1.0 / b;
 	}
 
-	public static boolean isNull(Object obj) {
+	public static <S> boolean isNull(S obj) {
 		return obj == null;
 	}
 
-	public static boolean isNotNull(Object obj) {
+	public static <S> boolean isNotNull(S obj) {
 		return obj != null;
 	}
 
@@ -84,24 +89,35 @@ public class FunctionUtils {
 
 	/*----------------------------------------------------------------------------------------------------------*/
 
+	/** @see Collections#emptyList() */
+	public static <S> List<S> emptyList() {
+		return Collections.emptyList();
+	}
+
+	/** @see Collections#emptyMap() */
+	public static <S, T> Map<S, T> emptyMap() {
+		return Collections.emptyMap();
+	}
+
 	@SafeVarargs
 	public static <S> List<S> asList(S... ss) {
 		return Arrays.asList(ss);
 	}
 
-	public static <S> Stream<S> stream(S[] ss) {
+	@SafeVarargs
+	public static <S> Stream<S> stream(S... ss) {
 		return Arrays.stream(ss);
 	}
 
-	public static IntStream stream(int[] is) {
+	public static IntStream stream(int... is) {
 		return Arrays.stream(is);
 	}
 
-	public static DoubleStream stream(double[] ds) {
+	public static DoubleStream stream(double... ds) {
 		return Arrays.stream(ds);
 	}
 
-	public static LongStream stream(long[] ls) {
+	public static LongStream stream(long... ls) {
 		return Arrays.stream(ls);
 	}
 
@@ -112,10 +128,11 @@ public class FunctionUtils {
 	}
 
 	@SafeVarargs
-	public static <S> void use(S s, Consumer<S>... cons) {
+	public static <S> S use(S s, Consumer<S>... cons) {
 		for (Consumer<S> con : cons) {
 			con.accept(s);
 		}
+		return s;
 	}
 
 	public static <S, T, U> Function<S, U> andThen(Function<S, T> fun1, Function<? super T, ? extends U> fun2) {
@@ -123,6 +140,12 @@ public class FunctionUtils {
 	}
 
 	/*----------------------------------------------------------------------------------------------------------*/
+	private final static Consumer<?> EMPTY_CONSUMER = obj -> {};
+
+	@SuppressWarnings("unchecked")
+	public static <S> Consumer<S> emptyConsumer() {
+		return (Consumer<S>) EMPTY_CONSUMER;
+	}
 
 	public static <S> Runnable getRunnable(Consumer<? super S> con, S s) {
 		return () -> con.accept(s);
@@ -285,7 +308,7 @@ public class FunctionUtils {
 	/*-----------------------------------------other-----------------------------------------------------------------*/
 
 	public static <S, T extends S> Stream<T> down(Stream<S> parentStream, Class<T> childClass) {
-		return parentStream.filter(ele -> childClass.isInstance(ele)).map(ele -> childClass.cast(ele));
+		return parentStream.filter(childClass::isInstance).map(childClass::cast);
 	}
 
 	/** 返回的list为{@link ArrayList} */
@@ -302,6 +325,10 @@ public class FunctionUtils {
 		} else {
 			return IteratorUtils.toListUseIndex(ss.iterator(), fun);
 		}
+	}
+
+	public static <S, T, U> void toMapForEach(S[] ss, Function<? super S, ? extends T> key, Function<? super S, ? extends U> value, BiConsumer<? super T, ? super U> con) {
+		FunctionUtils.forEach(ss, s -> con.accept(key.apply(s), value.apply(s)));
 	}
 
 	public static <S, T, U> void toMapForEach(Stream<S> stream, Function<? super S, ? extends T> key, Function<? super S, ? extends U> value, BiConsumer<? super T, ? super U> con) {

@@ -12,6 +12,14 @@ public class Downloader {
 		return download(urlStr, -1);
 	}
 
+	public static byte[] download(String urlStr, int proxyPort) {
+		try {
+			return download(urlStr, "127.0.0.1", proxyPort);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
 	public static byte[] download(String urlStr, String proxyHost, int proxyPort) throws Exception {
 		Proxy proxy = null;
 		if (proxyHost != null && proxyPort > 0) {
@@ -34,14 +42,6 @@ public class Downloader {
 			return baos.toByteArray();
 		} finally {
 			huc.disconnect();
-		}
-	}
-
-	public static byte[] download(String urlStr, int proxyPort) {
-		try {
-			return download(urlStr, "127.0.0.1", proxyPort);
-		} catch (Exception e) {
-			return null;
 		}
 	}
 }

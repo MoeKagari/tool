@@ -3,10 +3,15 @@ package tool.compress;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class GZIP {
+	public static Optional<byte[]> compressOptional(byte[] data) {
+		return Optional.ofNullable(compress(data));
+	}
+
 	public static byte[] compress(byte[] data) {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); GZIPOutputStream gos = new GZIPOutputStream(baos)) {
 
@@ -18,6 +23,10 @@ public class GZIP {
 		} catch (IOException e) {
 			return null;
 		}
+	}
+
+	public static Optional<byte[]> decompressOptional(byte[] data) {
+		return Optional.ofNullable(decompress(data));
 	}
 
 	public static byte[] decompress(byte[] data) {

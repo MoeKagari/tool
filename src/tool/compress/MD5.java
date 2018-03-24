@@ -2,8 +2,13 @@ package tool.compress;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Optional;
 
 public class MD5 {
+	public static Optional<String> getMD5Optional(String sourceStr) {
+		return Optional.ofNullable(getMD5(sourceStr));
+	}
+
 	public static String getMD5(String sourceStr) {
 		try {
 			MessageDigest md5 = MessageDigest.getInstance("MD5");

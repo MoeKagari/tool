@@ -1,10 +1,15 @@
 package tool.compress;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Optional;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 public class ZLib {
+	public static Optional<byte[]> compressOptional(byte[] data) {
+		return Optional.ofNullable(compress(data));
+	}
+
 	public static byte[] compress(byte[] data) {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 			Deflater compresser = new Deflater();
@@ -23,6 +28,10 @@ public class ZLib {
 		} catch (Exception e) {
 			return null;
 		}
+	}
+
+	public static Optional<byte[]> decompressOptional(byte[] data) {
+		return Optional.ofNullable(decompress(data));
 	}
 
 	public static byte[] decompress(byte[] data) {
